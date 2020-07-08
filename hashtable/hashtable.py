@@ -7,6 +7,22 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
+    def replace(self, key, value):
+        """
+        Given a key and a value, recursively traverse a HashTableEntry object and check for a key match.
+        If a key match is found, replace the current value with the input value.
+        Otherwise, store the key and value as a new node at the end.
+        """
+        if self.key == key:
+            self.value = value
+            return
+
+        else:
+            if self.next == None:
+                self.next = HashTableEntry(key, value)
+                return 
+            
+            self.next.replace(key, value)
 
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
@@ -99,12 +115,28 @@ class HashTable:
         # use hash value to get the index for the correct bucket
         index = self.hash_index(key)
 
-        # create the Hash Table Entry object and store the key and value
-        entry = HashTableEntry(key, value)
+        # If the bucket is empty
+        if self.buckets[index] == None:
 
-        # store the entry 
-        self.buckets[index] = entry
+            # Instantiate Hash Table Entry object with the key and value
+            entry = HashTableEntry(key, value)
+
+            # store the entry 
+            self.buckets[index] = entry
         
+        # If the bucket is not empty (collision is possible)
+        else:
+            self.buckets[index].replace(key, value)
+        
+            # curr = self.buckets[index]
+            
+            # while curr != None:
+            #     if curr.key == key:
+            #         print(key, value, curr.value)
+            #         curr.value = value
+            #         break
+            #     else:
+            #         curr = curr.next
 
     def delete(self, key):
         """
@@ -138,9 +170,22 @@ class HashTable:
 
         entry = self.buckets[index]
 
-        if entry != None:
-            return entry.value
+        # Check for non-existent entry at the key's index
+        if entry == None:
+            return None
+
+        # If the index has an entry
         else:
+            
+            # Search for the node with the correct key
+            while entry != None:
+                if entry.key == key:
+                    return entry.value
+
+                else:
+                    entry = entry.next
+
+            # If no node matches the key
             return None
 
 
@@ -163,55 +208,98 @@ class HashTable:
         self.buckets = new_buckets
 
 
-    def collision_checker(self, table_entry, new_entry, method):
+    def collision_checker(self, table_entry, new_key, new_value, method):
         """
-        Given 2 hash table entry objects (linked lists), 
-        check to see if the key in new_entry exists in table_entry.
+        Given a hash table entry object (linked list) and a key/value pair,
+        check to see if the key exists in the hash table entry.
         """
-
+        
         while table_entry != None:
-            if table_entry.key == new_entry.key:
+            if table_entry.key == new_key:
 
                 if method == 'put':
-                    table_entry.value = new_entry.value
+                    table_entry.value = new_value
+                    return None
+
                 elif method == 'get':
-                    
+                    return table_entry.value
+
+                elif method == 'delete':
+                    table_entry = table_entry.next
+                    return None
+
+                else:
+                    raise ValueError("Invalid method argument. Must be 'put', 'get', or 'delete'.")
+
             else:
                 table_entry = table_entry.next
 
         return 
 
 if __name__ == "__main__":
+    # ht = HashTable(8)
+
+    # ht.put("line_1", "'Twas brillig, and the slithy toves")
+    # ht.put("line_2", "Did gyre and gimble in the wabe:")
+    # ht.put("line_3", "All mimsy were the borogoves,")
+    # ht.put("line_4", "And the mome raths outgrabe.")
+    # ht.put("line_5", '"Beware the Jabberwock, my son!')
+    # ht.put("line_6", "The jaws that bite, the claws that catch!")
+    # ht.put("line_7", "Beware the Jubjub bird, and shun")
+    # ht.put("line_8", 'The frumious Bandersnatch!"')
+    # ht.put("line_9", "He took his vorpal sword in hand;")
+    # ht.put("line_10", "Long time the manxome foe he sought--")
+    # ht.put("line_11", "So rested he by the Tumtum tree")
+    # ht.put("line_12", "And stood awhile in thought.")
+
+    # print("")
+
+    # # Test storing beyond capacity
+    # for i in range(1, 13):
+    #     print(ht.get(f"line_{i}"))
+
+    # # Test resizing
+    # old_capacity = ht.get_num_slots()
+    # ht.resize(ht.capacity * 2)
+    # new_capacity = ht.get_num_slots()
+
+    # print(f"\nResized from {old_capacity} to {new_capacity}.\n")
+
+    # # Test if data intact after resizing
+    # for i in range(1, 13):
+    #     print(ht.get(f"line_{i}"))
+
+    # print("")
+
     ht = HashTable(8)
 
-    ht.put("line_1", "'Twas brillig, and the slithy toves")
-    ht.put("line_2", "Did gyre and gimble in the wabe:")
-    ht.put("line_3", "All mimsy were the borogoves,")
-    ht.put("line_4", "And the mome raths outgrabe.")
-    ht.put("line_5", '"Beware the Jabberwock, my son!')
-    ht.put("line_6", "The jaws that bite, the claws that catch!")
-    ht.put("line_7", "Beware the Jubjub bird, and shun")
-    ht.put("line_8", 'The frumious Bandersnatch!"')
-    ht.put("line_9", "He took his vorpal sword in hand;")
-    ht.put("line_10", "Long time the manxome foe he sought--")
-    ht.put("line_11", "So rested he by the Tumtum tree")
-    ht.put("line_12", "And stood awhile in thought.")
+    ht.put('A', 1)
+    print(ht.get('A'))
+    
+    ht.put('A', 2)
+    print(ht.get('A'))
 
-    print("")
+    #ht.put('C', 3)
+    #ht.put('D', 4)
 
-    # Test storing beyond capacity
-    for i in range(1, 13):
-        print(ht.get(f"line_{i}"))
 
-    # Test resizing
-    old_capacity = ht.get_num_slots()
-    ht.resize(ht.capacity * 2)
-    new_capacity = ht.get_num_slots()
 
-    print(f"\nResized from {old_capacity} to {new_capacity}.\n")
+    """
+    q = HashTableEntry('A', 1)
+    q.next = HashTableEntry('B', 2)
+    q.next.next = HashTableEntry('C', 3)
 
-    # Test if data intact after resizing
-    for i in range(1, 13):
-        print(ht.get(f"line_{i}"))
+    w = q
+    while w != None:
+        print(w.key, w.value)
+        w = w.next
+    
+    print('\n\n')
 
-    print("")
+    q.replace('B', 8)
+
+    w = q
+    while w != None:
+        print(w.key, w.value)
+        w = w.next
+    """
