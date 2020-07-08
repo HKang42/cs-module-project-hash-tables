@@ -20,8 +20,10 @@ class HashTable:
     Implement this.
     """
 
-    def __init__(self, capacity):
+    def __init__(self, capacity = MIN_CAPACITY, buckets = None):
         # Your code here
+        self.capacity = capacity
+        self.buckets = [None] * capacity
 
 
     def get_num_slots(self):
@@ -35,6 +37,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        return len(self.buckets)
 
 
     def get_load_factor(self):
@@ -63,6 +66,16 @@ class HashTable:
         Implement this, and/or FNV-1.
         """
         # Your code here
+        
+        # random prime number that works for some reason
+        hash = 5381
+
+        # convert each letter in key string to Unicode numbers using ord()
+        # no idea what this 33 is doing -> this tries to explain it https://stackoverflow.com/questions/10696223/reason-for-5381-number-in-djb-hash-function/13809282#13809282
+        for letter in key:
+            hash = (hash * 33) + ord(letter)
+        
+        return hash
 
 
     def hash_index(self, key):
@@ -82,7 +95,16 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        
+        # use hash value to get the index for the correct bucket
+        index = self.hash_index(key)
 
+        # create the Hash Table Entry object and store the key and value
+        entry = HashTableEntry(key, value)
+
+        # store the entry 
+        self.buckets[index] = entry
+        
 
     def delete(self, key):
         """
@@ -93,6 +115,13 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        index = self.hash_index(key)
+
+        if self.buckets[index] == None:
+            print("Key not found")
+
+        else:
+            self.buckets[index] = None
 
 
     def get(self, key):
@@ -105,6 +134,15 @@ class HashTable:
         """
         # Your code here
 
+        index = self.hash_index(key)
+
+        entry = self.buckets[index]
+
+        if entry != None:
+            return entry.value
+        else:
+            return None
+
 
     def resize(self, new_capacity):
         """
@@ -114,7 +152,15 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        new_buckets = [None] * new_capacity
 
+        self.capacity = new_capacity
+
+        for entry in self.buckets:
+            index = self.hash_index(entry.key)
+            new_buckets[index] = entry
+
+        self.buckets = new_buckets
 
 
 if __name__ == "__main__":
