@@ -163,6 +163,24 @@ class HashTable:
         self.buckets = new_buckets
 
 
+    def collision_checker(self, table_entry, new_entry, method):
+        """
+        Given 2 hash table entry objects (linked lists), 
+        check to see if the key in new_entry exists in table_entry.
+        """
+
+        while table_entry != None:
+            if table_entry.key == new_entry.key:
+
+                if method == 'put':
+                    table_entry.value = new_entry.value
+                elif method == 'get':
+                    
+            else:
+                table_entry = table_entry.next
+
+        return 
+
 if __name__ == "__main__":
     ht = HashTable(8)
 
