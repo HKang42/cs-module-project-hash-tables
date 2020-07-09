@@ -23,6 +23,14 @@ class HashTableEntry:
                 return 
             
             self.next.replace(key, value)
+    
+    def __str__(self):
+        string = "Key: {}  Value: {}\t".format(self.key, self.value)
+        curr = self.next
+        while curr != None:
+            string += "Key: {}  Value: {}\t".format(curr.key, curr.value)
+            curr = curr.next
+        return string[0:-2]
 
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
@@ -36,10 +44,11 @@ class HashTable:
     Implement this.
     """
 
-    def __init__(self, capacity = MIN_CAPACITY, buckets = None):
+    def __init__(self, capacity = MIN_CAPACITY):
         # Your code here
         self.capacity = capacity
         self.buckets = [None] * capacity
+        self.items = 0
 
 
     def get_num_slots(self):
@@ -63,6 +72,8 @@ class HashTable:
         Implement this.
         """
         # Your code here
+
+        return self.items / len(self.buckets)
 
 
     def fnv1(self, key):
@@ -124,6 +135,11 @@ class HashTable:
 
             # store the entry 
             self.buckets[index] = entry
+
+            self.items += 1
+
+            if self.get_load_factor() > 0.7:
+                self.resize(self.capacity * 2)
         
         # If the bucket is not empty (collision is possible)
         else:
@@ -159,6 +175,7 @@ class HashTable:
         elif self.buckets[index].next == None:
             if self.buckets[index].key == key:
                 self.buckets[index] = None
+                self.items -= 1
                 return
             else:
                 print("Key not found")
@@ -172,6 +189,7 @@ class HashTable:
             # If the first entry is the key
             if prev.key == key:
                 self.buckets[index] = prev.next
+                self.items -= 1
                 return
             
             # Loop through 2nd entry until end
@@ -180,6 +198,7 @@ class HashTable:
                 # If match found, delete by reassigning pointers
                 if curr.key == key:
                     prev.next = curr.next
+                    self.items -= 1
                     return
                 
                 else:
@@ -235,87 +254,59 @@ class HashTable:
 
         self.capacity = new_capacity
 
+        # We cannot just move entries from the old bucket list to the new bucket list because the hash indices for the keys might change
+        # So we loop through each entry and all of its nodes (key/value pairs) individually to the new buckets list
         for entry in self.buckets:
-            index = self.hash_index(entry.key)
-            new_buckets[index] = entry
+            while entry != None:
+                index = self.hash_index(entry.key)
+
+                # Since we are operating on a list and not a Hash Table, we can't use the .put() method
+                # But we can easily adapt the code since .put() did not rely on other Hash Table functions.
+                if new_buckets[index] == None:
+                    #  Use a new entry object so that we don't inherit the 'next' pointer
+                    new_buckets[index] = HashTableEntry(entry.key, entry.value)
+                else:
+                    new_buckets[index].replace(entry.key, entry.value)
+                
+                entry = entry.next
 
         self.buckets = new_buckets
 
 
-    def collision_checker(self, table_entry, new_key, new_value, method):
-        """
-        Given a hash table entry object (linked list) and a key/value pair,
-        check to see if the key exists in the hash table entry.
-        """
-        
-        while table_entry != None:
-            if table_entry.key == new_key:
-
-                if method == 'put':
-                    table_entry.value = new_value
-                    return None
-
-                elif method == 'get':
-                    return table_entry.value
-
-                elif method == 'delete':
-                    table_entry = table_entry.next
-                    return None
-
-                else:
-                    raise ValueError("Invalid method argument. Must be 'put', 'get', or 'delete'.")
-
-            else:
-                table_entry = table_entry.next
-
-        return 
-
 if __name__ == "__main__":
-    # ht = HashTable(8)
-
-    # ht.put("line_1", "'Twas brillig, and the slithy toves")
-    # ht.put("line_2", "Did gyre and gimble in the wabe:")
-    # ht.put("line_3", "All mimsy were the borogoves,")
-    # ht.put("line_4", "And the mome raths outgrabe.")
-    # ht.put("line_5", '"Beware the Jabberwock, my son!')
-    # ht.put("line_6", "The jaws that bite, the claws that catch!")
-    # ht.put("line_7", "Beware the Jubjub bird, and shun")
-    # ht.put("line_8", 'The frumious Bandersnatch!"')
-    # ht.put("line_9", "He took his vorpal sword in hand;")
-    # ht.put("line_10", "Long time the manxome foe he sought--")
-    # ht.put("line_11", "So rested he by the Tumtum tree")
-    # ht.put("line_12", "And stood awhile in thought.")
-
-    # print("")
-
-    # # Test storing beyond capacity
-    # for i in range(1, 13):
-    #     print(ht.get(f"line_{i}"))
-
-    # # Test resizing
-    # old_capacity = ht.get_num_slots()
-    # ht.resize(ht.capacity * 2)
-    # new_capacity = ht.get_num_slots()
-
-    # print(f"\nResized from {old_capacity} to {new_capacity}.\n")
-
-    # # Test if data intact after resizing
-    # for i in range(1, 13):
-    #     print(ht.get(f"line_{i}"))
-
-    # print("")
-
     ht = HashTable(8)
 
-    ht.put('A', 1)
-    print(ht.get('A'))
-    
-    ht.put('A', 2)
-    print(ht.get('A'))
+    ht.put("line_1", "'Twas brillig, and the slithy toves")
+    ht.put("line_2", "Did gyre and gimble in the wabe:")
+    ht.put("line_3", "All mimsy were the borogoves,")
+    ht.put("line_4", "And the mome raths outgrabe.")
+    ht.put("line_5", '"Beware the Jabberwock, my son!')
+    ht.put("line_6", "The jaws that bite, the claws that catch!")
+    ht.put("line_7", "Beware the Jubjub bird, and shun")
+    ht.put("line_8", 'The frumious Bandersnatch!"')
+    ht.put("line_9", "He took his vorpal sword in hand;")
+    ht.put("line_10", "Long time the manxome foe he sought--")
+    ht.put("line_11", "So rested he by the Tumtum tree")
+    ht.put("line_12", "And stood awhile in thought.")
 
-    #ht.put('C', 3)
-    #ht.put('D', 4)
+    print("")
 
+    # Test storing beyond capacity
+    for i in range(1, 13):
+        print(ht.get(f"line_{i}"))
+
+    # Test resizing
+    old_capacity = ht.get_num_slots()
+    ht.resize(ht.capacity * 2)
+    new_capacity = ht.get_num_slots()
+
+    print(f"\nResized from {old_capacity} to {new_capacity}.\n")
+
+    # Test if data intact after resizing
+    for i in range(1, 13):
+        print(i, ht.get(f"line_{i}"))
+
+    print("")
 
 
     """
