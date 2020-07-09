@@ -115,6 +115,7 @@ class HashTable:
         # use hash value to get the index for the correct bucket
         index = self.hash_index(key)
 
+
         # If the bucket is empty
         if self.buckets[index] == None:
 
@@ -127,7 +128,7 @@ class HashTable:
         # If the bucket is not empty (collision is possible)
         else:
             self.buckets[index].replace(key, value)
-        
+
             # curr = self.buckets[index]
             
             # while curr != None:
@@ -149,12 +150,45 @@ class HashTable:
         # Your code here
         index = self.hash_index(key)
 
+        # If bucket is blank
         if self.buckets[index] == None:
             print("Key not found")
-
+            return
+        
+        # If bucket has only 1 entry
+        elif self.buckets[index].next == None:
+            if self.buckets[index].key == key:
+                self.buckets[index] = None
+                return
+            else:
+                print("Key not found")
+                return
+        
+        # If bucket has multiple entries
         else:
-            self.buckets[index] = None
-
+            prev = self.buckets[index]
+            curr = self.buckets[index].next
+            
+            # If the first entry is the key
+            if prev.key == key:
+                self.buckets[index] = prev.next
+                return
+            
+            # Loop through 2nd entry until end
+            while curr != None:
+                
+                # If match found, delete by reassigning pointers
+                if curr.key == key:
+                    prev.next = curr.next
+                    return
+                
+                else:
+                    prev = curr
+                    curr = curr.next
+            
+            # If no matches were found
+            print("Key not found")
+            return
 
     def get(self, key):
         """
