@@ -1,5 +1,7 @@
 # Your code here
-
+import random
+import math
+import time
 
 def slowfun_too_slow(x, y):
     v = math.pow(x, y)
@@ -9,6 +11,7 @@ def slowfun_too_slow(x, y):
 
     return v
 
+cache = {}
 def slowfun(x, y):
     """
     Rewrite slowfun_too_slow() in here so that the program produces the same
@@ -16,7 +19,13 @@ def slowfun(x, y):
     """
     # Your code here
 
+    if (x,y) in cache:
+        return cache[(x,y)]
 
+    else:
+        cache[(x,y)] = slowfun_too_slow(x, y)
+
+t0 = time.time()
 
 # Do not modify below this line!
 
@@ -24,3 +33,8 @@ for i in range(50000):
     x = random.randrange(2, 14)
     y = random.randrange(3, 6)
     print(f'{i}: {x},{y}: {slowfun(x, y)}')
+
+
+# You can't tell me what to do! 
+t1 = time.time()
+print(f"\nRuntime was: {t1-t0 : 0.3f} seconds")
