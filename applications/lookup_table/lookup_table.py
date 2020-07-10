@@ -24,6 +24,7 @@ def slowfun(x, y):
 
     else:
         cache[(x,y)] = slowfun_too_slow(x, y)
+        return cache[(x,y)]
 
 t0 = time.time()
 
