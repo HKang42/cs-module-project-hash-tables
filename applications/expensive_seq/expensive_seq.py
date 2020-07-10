@@ -6,8 +6,8 @@ def expensive_seq(x, y, z):
     # Your code here
     if x <= 0: 
         return y + z
+    
     if x > 0: 
-
         if (x, y, z) in cache:
             return cache[(x,y,z)]
 
